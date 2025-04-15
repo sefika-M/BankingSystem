@@ -56,10 +56,9 @@ public class Transaction {
     public void printTransactionDetails() {
         if (account != null) {
         System.out.println("Account No: " + account.getAccountNumber());}
-        System.out.println("Date: " + date);
+        System.out.println("Transacction Date: " + date);
         System.out.println("Type: " + transactionType);
         System.out.println("Amount: ₹" + transactionAmount);
-        System.out.println("Transaction Date: " + date);
     }
 }
 

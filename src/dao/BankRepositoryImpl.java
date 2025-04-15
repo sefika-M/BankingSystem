@@ -172,10 +172,16 @@ public class BankRepositoryImpl implements IBankRepository {
     @Override
     public float deposit(long accNo, float amount) throws SQLException {
         if (amount <= 0) throw new SQLException("Invalid deposit amount.");
-      
+        Account account = getAccountById(accNo);
+        if (account == null) {
+            throw new SQLException("Account not found.");
+        }
+
+        float oldBalance = account.getAccountBalance();
+        float newBalance = oldBalance + amount;
         String update = "UPDATE Accounts SET balance = balance + ? WHERE account_id = ?";
         try  (PreparedStatement ps = conn.prepareStatement(update)) {
-            ps.setFloat(1, amount);
+            ps.setFloat(1, newBalance);
             ps.setLong(2, accNo);
             int updated = ps.executeUpdate();
             if (updated == 1) {
@@ -185,7 +191,7 @@ public class BankRepositoryImpl implements IBankRepository {
                 txnPs.setString(2, "deposit");
                 txnPs.setFloat(3, amount);
                 txnPs.executeUpdate();
-            }return getAccountBalance(accNo);
+            }return newBalance;
             }else {
             	throw new SQLException("Deposit failed.");        
             }
@@ -376,7 +382,7 @@ public class BankRepositoryImpl implements IBankRepository {
 
     
     @Override
-    public float calculateInterest(long accountNumber, float interestRate) throws SQLException, InvalidAccountException {
+    public float[] calculateInterest(long accountNumber, float interestRate) throws SQLException, InvalidAccountException {
         String sql = "SELECT balance FROM Accounts WHERE account_id = ? AND account_type = 'savings'";
         try (PreparedStatement ps = conn.prepareStatement(sql)) { 
             ps.setLong(1, accountNumber);
@@ -392,7 +398,7 @@ public class BankRepositoryImpl implements IBankRepository {
                     updatePs.executeUpdate();
                 }
 
-                return updatedBalance;
+                return new float[]{balance, interest, updatedBalance};
             } else {
                 throw new InvalidAccountException("Savings account not found for ID: " + accountNumber);
             }

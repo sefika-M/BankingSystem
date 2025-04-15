@@ -205,7 +205,7 @@ public class BankApp {
                         System.out.print("Enter Account Number: ");
                         long detAcc = sc.nextLong();
                         Account account = bank.getAccountDetails(detAcc);
-                        System.out.println("\n--- Account Details ---");
+                        System.out.println("\n--- Account Details ---\n");
                         System.out.println("Account ID: " + account.getAccountNumber());
                         System.out.println("Account Type: " + account.getAccountType());
                         System.out.println("Balance: " + account.getAccountBalance());
@@ -230,7 +230,7 @@ public class BankApp {
                     case 7:
                     	try {
                         Account[] allAccounts = bank.listAccounts();
-                        System.out.println("Listing All Accounts:");
+                        System.out.println("\nListing All Accounts:\n");
                         for (Account acc : allAccounts) {
                             acc.accountDetails();
                             System.out.println("-----------------------------");
@@ -249,6 +249,10 @@ public class BankApp {
                     		long accNo = sc.nextLong();
                     		System.out.print("Enter Interest Rate (%): ");
                             float rate = sc.nextFloat();
+                            if (rate < 0) {
+                                System.out.println("Interest rate cannot be negative.");
+                                break;
+                            }
                     		float updatedBalance = bank.calculateInterest(accNo, rate);
                     		if (updatedBalance != -1) {
                     		    System.out.println("Interest applied. New Balance: " + updatedBalance);
@@ -275,6 +279,7 @@ public class BankApp {
                             String from = sc.nextLine();
                             System.out.print("Enter To Date (yyyy-MM-dd): ");
                             String to = sc.nextLine();
+                            System.out.println("\nListing Transactions:\n");
 
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                             java.util.Date fromUtilDate = sdf.parse(from);

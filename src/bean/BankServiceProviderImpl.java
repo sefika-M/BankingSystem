@@ -2,15 +2,12 @@ package bean;
 import entity.*;
 import exception.*;
 import service.IBankServiceProvider;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import dao.BankRepositoryImpl;
-import dao.IBankRepository;
+import dao.*;
 
 public class BankServiceProviderImpl extends CustomerServiceProviderImpl implements IBankServiceProvider {
     private String branchName;
@@ -56,7 +53,6 @@ public class BankServiceProviderImpl extends CustomerServiceProviderImpl impleme
         }
         accType = accType.trim().toLowerCase();
         
-        // Validate account type
         if (!accType.equals("savings") && !accType.equals("current") && !accType.equals("zero_balance")) {
             throw new InvalidAccountException("Invalid account type. Allowed types are: savings, current, zero_balance.");
         }try {
@@ -75,7 +71,6 @@ public class BankServiceProviderImpl extends CustomerServiceProviderImpl impleme
         }
         accType = accType.trim().toLowerCase();
         
-        // Validate account type
         if (!accType.equals("savings") && !accType.equals("current") && !accType.equals("zero_balance")) {
             throw new InvalidAccountException("Invalid account type. Allowed types are: savings, current, zero_balance.");
         }try {
@@ -103,9 +98,18 @@ public class BankServiceProviderImpl extends CustomerServiceProviderImpl impleme
 
     @Override
     public float calculateInterest(long accNo, float interestRate) throws SQLException, InvalidAccountException {
-            return bankRepo.calculateInterest(accNo, interestRate);
-       
+    	if (interestRate < 0) {
+            System.out.println("Interest rate cannot be negative.");
+            return 0;
+    	}
+        float[] result = bankRepo.calculateInterest(accNo, interestRate); 
+        System.out.println("Previous Balance: ₹" + result[0]);
+        System.out.println("Interest Calculated: ₹" + result[1]);
+        System.out.println("New Balance after Interest: ₹" + result[2]);
+        return result[2];
     }
+
+    
 
     
     public List<Account> getAccountList() {

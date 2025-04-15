@@ -48,9 +48,13 @@ public class CustomerServiceProviderImpl implements ICustomerServiceProvider {
     @Override
     public float deposit(long accountNumber, float amount) throws InvalidAccountException, InvalidAmountException, SQLException {
         if (amount <= 0) throw new InvalidAmountException("Deposit amount must be positive.");
+    	Account account = bankRepo.getAccountById(accountNumber);
+        if (account == null) {
+            throw new InvalidAccountException("Account number " + accountNumber + " does not exist.");
+        }
+        
         return bankRepo.deposit(accountNumber, amount);
- 
-    }
+    } 
 
     @Override
     public float withdraw(long accountNumber, float amount) throws InvalidAccountException, InvalidAmountException, InsufficientFundException, OverDraftLimitExceededException, SQLException {
@@ -74,6 +78,10 @@ public class CustomerServiceProviderImpl implements ICustomerServiceProvider {
     
     @Override
     public List<Transaction> getTransactions(long accountNumber, Date fromDate, Date toDate) throws InvalidAccountException, SQLException {
+        Account account = bankRepo.getAccountById(accountNumber); 
+        if (account == null) {
+            throw new InvalidAccountException("Account number " + accountNumber + " does not exist.");
+        }
         return bankRepo.getTransactions(accountNumber, fromDate, toDate);
     }
 

@@ -13,7 +13,7 @@ public interface IBankRepository {
     Customer addCustomer(Customer customer) throws SQLException;
     Customer getCustomerById(int customerId) throws SQLException;
     List<Account> listAccounts() throws SQLException;
-    float calculateInterest(long accountNumber,  float interestRate) throws SQLException, InvalidAccountException;
+    float[] calculateInterest(long accountNumber,  float interestRate) throws SQLException, InvalidAccountException;
     float getAccountBalance(long accountNumber) throws SQLException, InvalidAccountException;
     float deposit(long accountNumber, float amount) throws SQLException, InvalidAccountException, InvalidAmountException;
     float withdraw(long accountNumber, float amount) throws SQLException, InvalidAccountException, InsufficientFundException, OverDraftLimitExceededException;
