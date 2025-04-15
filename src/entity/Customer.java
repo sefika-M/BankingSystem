@@ -1,5 +1,6 @@
 package entity;
 import java.sql.Date;
+import java.util.List;
 
 public class Customer {
     private int customerID;
@@ -9,11 +10,12 @@ public class Customer {
     private String emailAddress;
     private String phoneNumber;
     private String address;
+    private List<Account> accounts; 
+
 
     public Customer() {}
 
-    public Customer(int customerID, String firstName, String lastName, Date dob, String emailAddress, String phoneNumber, String address) {
-        this.customerID = customerID;
+    public Customer( String firstName, String lastName, Date dob, String emailAddress, String phoneNumber, String address) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
@@ -21,8 +23,24 @@ public class Customer {
         setPhoneNumber(phoneNumber);  
         this.address = address;
     }
+    
+    public Customer(int customerID, String firstName, String lastName, Date dob, String emailAddress, String phoneNumber, String address) {
+        this.customerID = customerID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dob = dob;
+        setEmailAddress(emailAddress); 
+        setPhoneNumber(phoneNumber);  
+        this.address = address;
+    }
 
-    public Date getDob() {
+    public Customer(int customerId, String firstName, String lastName) {
+    	this.customerID = customerID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+	}
+
+	public Date getDob() {
         return dob;
     }
 
@@ -86,6 +104,14 @@ public class Customer {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+	
+	public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
+    }
 
 	public void customerDetails() {
         System.out.println("Customer ID: " + customerID);

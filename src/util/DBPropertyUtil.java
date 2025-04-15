@@ -1,13 +1,18 @@
 package util;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 public class DBPropertyUtil {
 	public static String getConnectionString(String fileName) throws IOException {
         String connStr = null;
         Properties props = new Properties();
-        FileInputStream fs = new FileInputStream(fileName);
-        props.load(fs);
+        try (InputStream input = DBPropertyUtil.class.getClassLoader().getResourceAsStream(fileName)) {
+            if (input == null) {
+                throw new IOException("Unable to find " + fileName);
+            }
+            props.load(input);
+        }
         String user = props.getProperty("user");
         String password = props.getProperty("password");
         String protocol = props.getProperty("protocol");

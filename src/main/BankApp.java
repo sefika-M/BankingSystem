@@ -1,10 +1,8 @@
 package main;
 import entity.*;
 import exception.*;
+import util.*;
 import bean.BankServiceProviderImpl;
-import dao.BankRepositoryImpl;
-import util.DBConnUtil;
-
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -15,8 +13,6 @@ public class BankApp {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         BankServiceProviderImpl bank = new BankServiceProviderImpl("Main Branch", "Chennai");
-        BankRepositoryImpl repo = new BankRepositoryImpl();
-
 
         while (true) {
             System.out.println("\n--- Welcome to the HMBank Banking System! ---");
@@ -38,6 +34,46 @@ public class BankApp {
                 switch (choice) {
                     case 1:
                     	try {
+                    		
+                    		 System.out.println("Are you already a customer? (yes/no)");
+                             String isCustomer = sc.nextLine().toLowerCase();
+                             Customer customer = null;
+                             if (isCustomer.equals("yes")) {
+                                 System.out.print("Enter Customer ID: ");
+                                 int id = sc.nextInt();
+                                 sc.nextLine(); 
+                                 customer = bank.getCustomerById(id); 
+                                 if (customer == null) {
+                                     System.out.println("Customer not found with ID: " + id);
+                                     break;
+                                 }
+                             } else if (isCustomer.equals("no")) {
+                              
+                                 System.out.print("Enter First Name: ");
+                                 String fname = sc.nextLine();
+                                 System.out.print("Enter Last Name: ");
+                                 String lname = sc.nextLine();
+                                 System.out.print("Enter DOB (yyyy-MM-dd): ");
+                                 String dobStr = sc.nextLine();
+                                 Date dob = Date.valueOf(dobStr);
+                                 System.out.print("Enter Email: ");
+                                 String email = sc.nextLine();
+                                 System.out.print("Enter Phone Number (10 digits): ");
+                                 String phone = sc.nextLine();
+                                 System.out.print("Enter Address: ");
+                                 String address = sc.nextLine();
+                                 customer = new Customer(fname, lname, dob, email, phone, address);
+                                 boolean added = bank.addCustomer(customer); 
+                                 if (!added) {
+                                     System.out.println("Failed to add new customer.");
+                                     break;
+                                 }
+                                 System.out.println("Customer created successfully.");
+                             } else {
+                                 System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+                                 break;
+                             }
+                             
                     	 System.out.println("\nSelect Account Type:");
                          System.out.println("1. Savings");
                          System.out.println("2. Current");
@@ -45,46 +81,34 @@ public class BankApp {
                          System.out.print("Enter your choice: ");
                          int accType = sc.nextInt();
                          sc.nextLine(); 
-                         if (accType != 1 && accType != 2 && accType != 3) {
-                             System.out.println("Invalid account type selected. Please try again.");
-                             break;
-                         }
-                         try {
-                        System.out.print("Enter Customer ID: ");
-                        int id = sc.nextInt();
-                        sc.nextLine();
-                        System.out.print("Enter First Name: ");
-                        String fname = sc.nextLine();
-                        System.out.print("Enter Last Name: ");
-                        String lname = sc.nextLine();
-                        System.out.print("Enter DOB (yyyy-MM-dd): ");
-                        String dobStr = sc.nextLine();
-                        Date dob = Date.valueOf(dobStr);  
-                        System.out.print("Enter Email: ");
-                        String email = sc.nextLine();
-                        System.out.print("Enter Phone Number (10 digits): ");
-                        String phone = sc.nextLine();
-                        System.out.print("Enter Address: ");
-                        String address = sc.nextLine();
-                        Customer customer; 
-                        customer = new Customer(id, fname, lname, dob, email, phone, address);
-                       
+                                  
                         System.out.print("Enter Initial Balance: ");
                         float bal = sc.nextFloat();
                         
                         Account newAcc = null;
+                        if(bal>=0) {
                         if (accType == 1) {
-                            System.out.print("Enter Interest Rate (%): ");
-                            float rate = sc.nextFloat();
-                            newAcc = bank.createAccount(customer, "savings", bal, rate);
-                        } else if (accType == 2) {
-                            newAcc = bank.createAccount(customer, "current", bal);
-                        } else if (accType == 3) {
-                            newAcc = bank.createAccount(customer, "zerobalance", bal);
+                            if (bal < 500) {
+                                System.out.println("Minimum balance for Savings Account is 500.");
+                            } else {
+                                newAcc = bank.createAccount(customer, "savings", bal, 0); 
+                            }
+                            } else if (accType == 2) {
+                            	if (bal <= 0) {
+                                    System.out.println("Invalid Balance for current account.");
+                                } else {
+                                    newAcc = bank.createAccount(customer, "current", bal); 
+                                }                        
+                            	} else if (accType == 3) {
+                            newAcc = bank.createAccount(customer, "zero_balance", bal);
                         } else {
-                            System.out.println("Invalid account type.");
-                            continue;
+                            System.out.println("Invalid account type selected.");
+                            break;
+                        }}else {
+                            System.out.println("Invalid Balance.");
+
                         }
+                        
                         if (newAcc != null) {
                         System.out.println("\nAccount created successfully!");
                         System.out.println("Account number: " + newAcc.getAccountNumber());
@@ -95,7 +119,7 @@ public class BankApp {
                     	        System.out.println("Error: System failure - unexpected null reference.");
                     	   } catch (IllegalArgumentException e) {
                                System.out.println("Validation Error: " + e.getMessage());
-                    	   }
+                    	   
                     	}catch (Exception e) {
                             e.printStackTrace();
                             System.out.println("Something went wrong.");
@@ -180,10 +204,24 @@ public class BankApp {
                     	try {
                         System.out.print("Enter Account Number: ");
                         long detAcc = sc.nextLong();
-                        bank.getAccountDetails(detAcc);
+                        Account account = bank.getAccountDetails(detAcc);
+                        System.out.println("\n--- Account Details ---");
+                        System.out.println("Account ID: " + account.getAccountNumber());
+                        System.out.println("Account Type: " + account.getAccountType());
+                        System.out.println("Balance: " + account.getAccountBalance());
+
+                        Customer cust = account.getCustomer();
+                        System.out.println("Customer ID: " + cust.getCustomerID());
+                        System.out.println("Name: " + cust.getFirstName() + " " + cust.getLastName());
+                        System.out.println("DOB: " + cust.getDob());
+                        System.out.println("Email: " + cust.getEmailAddress());
+                        System.out.println("Phone: " + cust.getPhoneNumber());
+                        System.out.println("Address: " + cust.getAddress());
                     	 } catch (InvalidAccountException e) {
                     	        System.out.println("Invalid account: " + e.getMessage());
-                    	    } catch (NullPointerException e) {
+                    	    }catch (SQLException e) {
+                    	        System.out.println("Database error: " + e.getMessage());
+                    	    }catch (NullPointerException e) {
                     	    	e.printStackTrace();
                     	        System.out.println("System error: Null value encountered.");
                     	    }
@@ -207,27 +245,43 @@ public class BankApp {
                         
                     case 8:
                     	try {
-                        bank.calculateInterest();
-                    	 } catch (NullPointerException e) {
+                    		System.out.print("Enter Account Number: ");
+                    		long accNo = sc.nextLong();
+                    		System.out.print("Enter Interest Rate (%): ");
+                            float rate = sc.nextFloat();
+                    		float updatedBalance = bank.calculateInterest(accNo, rate);
+                    		if (updatedBalance != -1) {
+                    		    System.out.println("Interest applied. New Balance: " + updatedBalance);
+                    		}
+                    		else
+                                System.out.println("Interest can only be applied to savings accounts.");
+                    	 } catch (InvalidAccountException e) {
+                    	        System.out.println(e.getMessage());  
+                    	 }catch (NullPointerException e) {
                     		 e.printStackTrace();
                     	        System.out.println("Error: No accounts found or data missing.");
-                    	 }
+                    	 } catch (Exception e) {
+                    	        e.printStackTrace();
+                    	    }
                         break;
+
 
                     case 9:
                     	try {
                             System.out.print("Enter Account Number: ");
                             long accNum = sc.nextLong();
-                            sc.nextLine(); // clear buffer
-
+                            sc.nextLine(); 
                             System.out.print("Enter From Date (yyyy-MM-dd): ");
                             String from = sc.nextLine();
                             System.out.print("Enter To Date (yyyy-MM-dd): ");
                             String to = sc.nextLine();
 
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                            java.util.Date fromDate = sdf.parse(from);
-                            java.util.Date toDate = sdf.parse(to);
+                            java.util.Date fromUtilDate = sdf.parse(from);
+                            java.util.Date toUtilDate = sdf.parse(to);
+
+                            java.sql.Date fromDate = new java.sql.Date(fromUtilDate.getTime());
+                            java.sql.Date toDate = new java.sql.Date(toUtilDate.getTime());
 
                             List<Transaction> txnList = bank.getTransactions(accNum, fromDate, toDate);
                             if (txnList.isEmpty()) {
